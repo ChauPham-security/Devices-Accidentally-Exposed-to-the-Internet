@@ -92,7 +92,7 @@ DeviceLogonEvents
 
 ---
 
-## 🤩 MITRE ATT\&CK Mapping
+## MITRE ATT\&CK Mapping
 
 | Tactic                        | Technique ID | Description                                                        |
 | ----------------------------- | ------------ | ------------------------------------------------------------------ |
@@ -123,13 +123,6 @@ DeviceLogonEvents
 * Automate exposure detection using cloud posture tools.
 * Apply baseline lockout/MFA policies to all accounts by default.
 * Set up alerting for excessive login failures from external IPs.
-
----
-
-## 📁 Files & Queries
-
-* [KQL Queries Used](./kql-queries.txt) *(optional if you want to link to a .txt or .md file)*
-* Threat detection summary and timeline
 
 ---
 

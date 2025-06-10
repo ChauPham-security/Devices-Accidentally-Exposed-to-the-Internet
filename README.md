@@ -48,47 +48,79 @@ DeviceInfo
 
 * `windows-target-1` was publicly exposed as of: `2025-05-29T19:12:46Z`
 
-#### ❌ Brute-Force Attempts Detected
+#### ❌ Brute-Force Attempts Detected: Several bad actors have been discovered attempting to log onto the target machine.
 
 ```kql
 DeviceLogonEvents
 | where DeviceName == "windows-target-1"
 | where LogonType has_any ("Network", "Interactive", "RemoteInteractive", "Unlock")
 | where ActionType == "LogonFailed"
-| where isnotempty(RemoteIP)
-| summarize Attempts = count() by RemoteIP
+| where isnotempty(RemoteIP )
+| summarize Attempts = count() by ActionType, RemoteIP, DeviceName
+| order by Attempts
 ```
+<img width="559" alt="Screenshot 2025-06-10 at 6 22 07 PM" src="https://github.com/user-attachments/assets/eda977ee-fc81-4f44-aea2-2490a6b922ec" />
 
-* Top 5 brute-force IPs (all failed):
 
-  * `65.21.227.213`
-  * `37.27.96.174`
-  * `102.88.21.215`
-  * `88.214.25.117`
-  * `20.64.248.197`
 
-#### ✅ No Evidence of Compromise
+#### ✅ No Evidence of Compromise: The top 5 most failed login attempt IP addresses have not been able to successfully break into the VM.
 
 ```kql
+// Take the top 5 IPs with the most logon failures and see if any succeeded to logon
+let RemoteIPsInQuestion = dynamic(["65.21.227.213","37.27.96.174", "102.88.21.215", "88.214.25.117", "20.64.248.197"]);
 DeviceLogonEvents
-| where DeviceName == "windows-target-1"
+| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
 | where ActionType == "LogonSuccess"
-| where RemoteIP has_any(["65.21.227.213", ...])
+| where RemoteIP has_any(RemoteIPsInQuestion)
 ```
 
 * No successful logins from brute-force IPs.
 
-#### 🧑‍💻 Legitimate Logons Reviewed
+#### ✅ Legitimate Account Logon Activity: `labuser`
+
+The only successful remote network logon in the last 30 days was for the `labuser` account (2 total logins):
 
 ```kql
 DeviceLogonEvents
 | where DeviceName == "windows-target-1"
+| where LogonType == "Network"
 | where ActionType == "LogonSuccess"
 | where AccountName == "labuser"
+| summarize count()
 ```
 
-* ‘labuser’ successfully logged in twice from expected IPs.
-* No failed logins or brute force attempts for this account.
+There were **zero (0) failed logon attempts** for the `labuser` account, which indicates that:
+- No brute force attempts were made against this account.
+- A one-time password guess is highly unlikely.
+
+```kql
+DeviceLogonEvents
+| where DeviceName == "windows-target-1"
+| where LogonType == "Network"
+| where ActionType == "LogonFailed"
+| where AccountName == "labuser"
+| summarize count()
+```
+
+We also checked all successful logon IP addresses for `labuser` to identify any unusual or unexpected sources. All observed IPs were from expected locations.
+
+```kql
+DeviceLogonEvents
+| where DeviceName == "windows-target-1"
+| where LogonType == "Network"
+| where ActionType == "LogonSuccess"
+| where AccountName == "labuser"
+| summarize LoginCount = count() by DeviceName, ActionType, AccountName, RemoteIP
+```
+<img width="728" alt="Screenshot 2025-06-10 at 6 29 51 PM" src="https://github.com/user-attachments/assets/170ea634-a23c-48bc-ada1-3d8699591dfb" />
+
+
+---
+
+### 🟢 Final Analysis
+
+Although the device was exposed to the internet and experienced repeated brute force login attempts from external IPs, **no successful unauthorized logins occurred**, and **the legitimate `labuser` account was not compromised**.
+
 
 ---
 

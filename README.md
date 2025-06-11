@@ -1,10 +1,13 @@
+
+<img width="1068" alt="Screenshot 2025-06-11 at 11 33 09 AM" src="https://github.com/user-attachments/assets/a95a279b-794f-4bd9-bc45-b77b00622cf2" />
+
 # 🔎 Devices Accidentally Exposed to the Internet
 
 This project showcases a real-world internal threat hunt focused on identifying misconfigured virtual machines (VMs) that were unintentionally exposed to the public internet. The investigation highlights potential brute-force attempts and outlines mitigation actions taken to reduce future risk.
 
 ---
 
-## 🛍️ Scenario Overview
+## Scenario Overview
 
 ### 🎯 Goal
 
